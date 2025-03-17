@@ -1,0 +1,76 @@
+// Authentification
+const users = {
+    "admin1": "pass1",
+    "admin2": "pass2",
+    "admin3": "pass3",
+    "admin4": "pass4",
+    "admin5": "pass5"
+};
+
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (users[username] && users[username] === password) {
+        localStorage.setItem('auth', 'true');
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('mainPage').classList.remove('hidden');
+        loadRecords();
+    } else {
+        alert('Identifiants incorrects !');
+    }
+}
+
+// Gestion des données
+let records = JSON.parse(localStorage.getItem('waterRecords') || '[]');
+
+function saveRecord() {
+    const record = {
+        id: Date.now(),
+        name: document.getElementById('fullName').value,
+        // Ajouter toutes les valeurs des champs
+        timestamp: new Date().toISOString()
+    };
+
+    records.push(record);
+    localStorage.setItem('waterRecords', JSON.stringify(records));
+    loadRecords();
+}
+
+function loadRecords() {
+    const recordsList = document.getElementById('recordsList');
+    recordsList.innerHTML = records
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(r => `
+            <div class="record">
+                <h4>${r.name}</h4>
+                <p>Volume: ${r.volume}L</p>
+            </div>
+        `).join('');
+}
+
+// Calculs
+function calculateValues() {
+    // Implémentez ici les calculs complexes
+    // selon les formules fournies
+}
+
+// Export CSV
+function exportCSV() {
+    const csvContent = "Nom,Volume,Date\n" +
+        records.map(r => `${r.name},${r.volume},${r.date}`).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'donnees_eau.csv';
+    a.click();
+}
+
+// Initialisation
+if (localStorage.getItem('auth') === 'true') {
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('mainPage').classList.remove('hidden');
+    loadRecords();
+}
